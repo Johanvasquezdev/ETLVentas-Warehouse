@@ -15,8 +15,12 @@ builder.ConfigureServices((hostContext, services) =>
         options.UseSqlServer(hostContext.Configuration.GetConnectionString("DWConnection"));
     });
 
+    // Inyectar el repositorio genérico
+    services.AddScoped(typeof(ETLVentas.DW.application.Interfaces.Repositories.IBaseRepository<>), typeof(ETLVentas.DW.persistencia.Repositories.BaseRepository<>));
+
     services.AddHostedService<Worker>();
 });
 
 using IHost host = builder.Build();
 host.Run();
+
