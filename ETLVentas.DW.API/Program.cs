@@ -1,12 +1,14 @@
-var builder = WebApplication.CreateBuilder(args);
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -14,28 +16,65 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
+// ENDPOINT DE VENTAS (MOCK PARA ETL)
+app.MapGet("/api/ventas", () =>
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+    var ventasMock = new List<VentaMockDto>
+    {
+        new VentaMockDto
+        {
+            OrderID = 90001,
+            CustomerID = 777,
+            FirstName = "Juan",
+            LastName = "Perez",
+            Email = "juan@api.com",
+            CityName = "Santo Domingo",
+            CountryName = "República Dominicana",
+            ProductID = 888,
+            ProductName = "Laptop Pro 15",
+            CategoryName = "Electrónica",
+            UnitPrice = 1500.00m,
+            Quantity = 1,
+            SaleDate = new DateTime(2026, 07, 26)
+        },
+        new VentaMockDto
+        {
+            OrderID = 90002,
+            CustomerID = 778,
+            FirstName = "Maria",
+            LastName = "Gomez",
+            Email = "maria@api.com",
+            CityName = "Santiago",
+            CountryName = "República Dominicana",
+            ProductID = 889,
+            ProductName = "Monitor 4K",
+            CategoryName = "Electrónica",
+            UnitPrice = 300.00m,
+            Quantity = 2,
+            SaleDate = new DateTime(2026, 07, 26)
+        }
+    };
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
+    return ventasMock;
 })
-.WithName("GetWeatherForecast");
+.WithName("GetVentas");
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+// DTO para estructurar los datos del JSON
+public class VentaMockDto
 {
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    public int OrderID { get; set; }
+    public int CustomerID { get; set; }
+    public string FirstName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string CityName { get; set; } = string.Empty;
+    public string CountryName { get; set; } = string.Empty;
+    public int ProductID { get; set; }
+    public string ProductName { get; set; } = string.Empty;
+    public string CategoryName { get; set; } = string.Empty;
+    public decimal UnitPrice { get; set; }
+    public int Quantity { get; set; }
+    public DateTime SaleDate { get; set; }
 }
