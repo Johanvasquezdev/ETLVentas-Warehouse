@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using ETLVentas.DW.API.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
@@ -60,21 +61,3 @@ app.MapGet("/api/ventas", () =>
 .WithName("GetVentas");
 
 app.Run();
-
-// DTO para estructurar los datos del JSON
-public class VentaMockDto
-{
-    public int OrderID { get; set; }
-    public int CustomerID { get; set; }
-    public string FirstName { get; set; } = string.Empty;
-    public string LastName { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-    public string CityName { get; set; } = string.Empty;
-    public string CountryName { get; set; } = string.Empty;
-    public int ProductID { get; set; }
-    public string ProductName { get; set; } = string.Empty;
-    public string CategoryName { get; set; } = string.Empty;
-    public decimal UnitPrice { get; set; }
-    public int Quantity { get; set; }
-    public DateTime SaleDate { get; set; }
-}
