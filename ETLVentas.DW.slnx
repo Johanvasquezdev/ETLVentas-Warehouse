@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="ETLVentas.DW.API/ETLVentas.DW.API.csproj" />
+  <Project Path="ETLVentas.DW.application/ETLVentas.DW.application.csproj" />
+  <Project Path="ETLVentas.DW.domain/ETLVentas.DW.domain.csproj" />
+  <Project Path="ETLVentas.DW.persistencia/ETLVentas.DW.persistencia.csproj" />
+  <Project Path="ETLVentas.DW.workerLoad/ETLVentas.DW.workerLoad.csproj" />
+</Solution>

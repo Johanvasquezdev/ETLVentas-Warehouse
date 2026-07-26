@@ -1,0 +1,6 @@
+@ETLVentas.DW.API_HostAddress = http://localhost:5022
+
+GET {{ETLVentas.DW.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
