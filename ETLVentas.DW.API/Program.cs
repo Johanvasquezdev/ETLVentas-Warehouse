@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using ETLVentas.DW.API.Models;
+using ETLVentas.DW.application.Models.Dtos;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
@@ -20,9 +20,9 @@ app.UseHttpsRedirection();
 // ENDPOINT DE VENTAS (MOCK PARA ETL)
 app.MapGet("/api/ventas", () =>
 {
-    var ventasMock = new List<VentaMockDto>
+    var ventasMock = new List<VentaExtraidaDto>
     {
-        new VentaMockDto
+        new VentaExtraidaDto
         {
             OrderID = 90001,
             CustomerID = 777,
@@ -36,9 +36,10 @@ app.MapGet("/api/ventas", () =>
             CategoryName = "Electrónica",
             UnitPrice = 1500.00m,
             Quantity = 1,
-            SaleDate = new DateTime(2026, 07, 26)
+            SaleDate = new DateTime(2026, 07, 26),
+            SourceName = "API"
         },
-        new VentaMockDto
+        new VentaExtraidaDto
         {
             OrderID = 90002,
             CustomerID = 778,
@@ -52,7 +53,8 @@ app.MapGet("/api/ventas", () =>
             CategoryName = "Electrónica",
             UnitPrice = 300.00m,
             Quantity = 2,
-            SaleDate = new DateTime(2026, 07, 26)
+            SaleDate = new DateTime(2026, 07, 26),
+            SourceName = "API"
         }
     };
 
