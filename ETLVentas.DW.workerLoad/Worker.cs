@@ -1,4 +1,5 @@
 ﻿using ETLVentas.DW.application.Interfaces.Services;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -7,13 +8,13 @@ namespace ETLVentas.DW.workerLoad
     public class Worker : BackgroundService
     {
         private readonly ILogger<Worker> _logger;
-        private readonly IEtlOrchestratorService _etlOrchestrator;
+        private readonly IServiceProvider _serviceProvider;
         private readonly IHostApplicationLifetime _lifetime;
 
-        public Worker(ILogger<Worker> logger, IEtlOrchestratorService etlOrchestrator, IHostApplicationLifetime lifetime)
+        public Worker(ILogger<Worker> logger, IServiceProvider serviceProvider, IHostApplicationLifetime lifetime)
         {
             _logger = logger;
-            _etlOrchestrator = etlOrchestrator;
+            _serviceProvider = serviceProvider;
             _lifetime = lifetime;
         }
 
@@ -26,31 +27,37 @@ namespace ETLVentas.DW.workerLoad
 
             try
             {
-                // ─── TAREA 1: CARGAR DIMENSIONES ───
-                _logger.LogInformation("");
-                var dimResult = await _etlOrchestrator.CargarDimensionesAsync();
-
-                if (!dimResult.Success)
+                // Crear un Scope para resolver los servicios Scoped (como DbContext y EtlOrchestratorService)
+                using (var scope = _serviceProvider.CreateScope())
                 {
-                    _logger.LogError("FALLO en la carga de dimensiones: {Msg}", dimResult.Message);
-                    _lifetime.StopApplication();
-                    return;
+                    var etlOrchestrator = scope.ServiceProvider.GetRequiredService<IEtlOrchestratorService>();
+
+                    // ─── TAREA 1: CARGAR DIMENSIONES ───
+                    _logger.LogInformation("");
+                    var dimResult = await etlOrchestrator.CargarDimensionesAsync();
+
+                    if (!dimResult.Success)
+                    {
+                        _logger.LogError("FALLO en la carga de dimensiones: {Msg}", dimResult.Message);
+                        _lifetime.StopApplication();
+                        return;
+                    }
+
+                    _logger.LogInformation("[TAREA 1] Resultado: {Msg}", dimResult.Message);
+
+                    // ─── TAREA 2: CARGAR HECHOS ───
+                    _logger.LogInformation("");
+                    var factResult = await etlOrchestrator.CargarFactSalesAsync();
+
+                    if (!factResult.Success)
+                    {
+                        _logger.LogError("FALLO en la carga de hechos: {Msg}", factResult.Message);
+                        _lifetime.StopApplication();
+                        return;
+                    }
+
+                    _logger.LogInformation("[TAREA 2] Resultado: {Msg}", factResult.Message);
                 }
-
-                _logger.LogInformation("[TAREA 1] Resultado: {Msg}", dimResult.Message);
-
-                // ─── TAREA 2: CARGAR HECHOS ───
-                _logger.LogInformation("");
-                var factResult = await _etlOrchestrator.CargarFactSalesAsync();
-
-                if (!factResult.Success)
-                {
-                    _logger.LogError("FALLO en la carga de hechos: {Msg}", factResult.Message);
-                    _lifetime.StopApplication();
-                    return;
-                }
-
-                _logger.LogInformation("[TAREA 2] Resultado: {Msg}", factResult.Message);
 
                 // ─── RESUMEN FINAL ───
                 _logger.LogInformation("");

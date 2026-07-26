@@ -6,36 +6,55 @@ using ETLVentas.DW.workerLoad;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Logging.Console;
+using System.IO;
 
 var builder = Host.CreateDefaultBuilder(args);
 
+// Configuracion de logging ultra-limpio para la presentacion
+builder.ConfigureLogging(logging =>
+{
+    logging.ClearProviders();
+    logging.AddConsole(options => options.FormatterName = "clean");
+    logging.AddConsoleFormatter<CleanConsoleFormatter, ConsoleFormatterOptions>();
+});
+
 builder.ConfigureServices((hostContext, services) =>
 {
-    // Entity Framework Core -> DW
     services.AddDbContext<DWContext>(options =>
     {
         options.UseSqlServer(hostContext.Configuration.GetConnectionString("DWConnection"));
     });
 
-    // Repositorio Genérico (DIP)
     services.AddScoped(typeof(ETLVentas.DW.application.Interfaces.Repositories.IBaseRepository<>),
                        typeof(ETLVentas.DW.persistencia.Repositories.BaseRepository<>));
 
-    // Extractores (SOC: cada uno extrae de una fuente distinta)
     services.AddScoped<IDataExtractorService, CsvExtractorService>();
     services.AddScoped<IDataExtractorService, ApiExtractorService>();
     services.AddScoped<IDataExtractorService, DbExtractorService>();
 
-    // HttpClient para el ApiExtractor
     services.AddHttpClient<ApiExtractorService>();
 
-    // Servicios de Limpieza y Orquestación
     services.AddScoped<IDbCleanupService, DbCleanupService>();
     services.AddScoped<IEtlOrchestratorService, EtlOrchestratorService>();
 
-    // Worker (BackgroundService)
     services.AddHostedService<Worker>();
 });
 
 using IHost host = builder.Build();
 host.Run();
+
+public sealed class CleanConsoleFormatter : ConsoleFormatter
+{
+    public CleanConsoleFormatter() : base("clean") { }
+    public override void Write<TState>(in LogEntry<TState> logEntry, IExternalScopeProvider? scopeProvider, TextWriter textWriter)
+    {
+        string? message = logEntry.Formatter(logEntry.State, logEntry.Exception);
+        if (!string.IsNullOrEmpty(message))
+        {
+            textWriter.WriteLine(message);
+        }
+    }
+}

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -26,7 +26,7 @@ namespace ETLVentas.DW.persistencia.Extractors
 
         public async Task<IEnumerable<VentaExtraidaDto>> ExtractAsync()
         {
-            _logger.LogInformation("[BD Externa] Iniciando extracción desde AnalisisVentas...");
+            _logger.LogInformation("[BD Externa] Iniciando extracción desde AnalisisDeVentas...");
 
             var ventas = new List<VentaExtraidaDto>();
 
@@ -47,14 +47,14 @@ namespace ETLVentas.DW.persistencia.Extractors
                         p.ProductID,
                         p.ProductName,
                         cat.CategoryName,
-                        p.UnitPrice,
+                        p.Price AS UnitPrice,
                         od.Quantity,
                         o.OrderDate AS SaleDate
                     FROM Orders o
                     INNER JOIN Customers c ON o.CustomerID = c.CustomerID
                     INNER JOIN Cities ci ON c.CityID = ci.CityID
                     INNER JOIN Countries co ON ci.CountryID = co.CountryID
-                    INNER JOIN OrderDetails od ON o.OrderID = od.OrderID
+                    INNER JOIN Order_Details od ON o.OrderID = od.OrderID
                     INNER JOIN Products p ON od.ProductID = p.ProductID
                     INNER JOIN Categories cat ON p.CategoryID = cat.CategoryID";
 
@@ -87,9 +87,11 @@ namespace ETLVentas.DW.persistencia.Extractors
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[BD Externa] Error durante la extracción");
+                _logger.LogWarning("[BD Externa] Omitiendo extracción: No se pudo conectar a la base de datos (AnalisisDeVentas). Motivo: {Msg}", ex.Message);
                 return Enumerable.Empty<VentaExtraidaDto>();
             }
         }
     }
 }
+
+
