@@ -1,6 +1,6 @@
 ﻿<div align="center">
   
-# 🚀 ETL & Data Warehouse - Análisis de Ventas
+# ETL & Data Warehouse - Análisis de Ventas
   
 **Un sistema completo de extracción, transformación y carga (ETL) construido en .NET 9 para poblar un Data Warehouse corporativo con Arquitectura en Estrella (Star Schema), optimizado para Inteligencia de Negocios (BI) y grandes volúmenes de datos.**
 
