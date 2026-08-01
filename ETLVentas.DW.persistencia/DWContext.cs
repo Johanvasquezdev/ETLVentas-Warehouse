@@ -1,4 +1,4 @@
-﻿using ETLVentas.DW.domain.Entities;
+using ETLVentas.DW.domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
@@ -18,7 +18,6 @@ namespace ETLVentas.DW.persistencia
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Aplica automáticamente todas las configuraciones IEntityTypeConfiguration encontradas en este ensamblado
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
             base.OnModelCreating(modelBuilder);
         }

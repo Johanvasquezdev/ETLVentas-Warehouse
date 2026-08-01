@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -41,7 +41,6 @@ namespace ETLVentas.DW.persistencia.Extractors
                     return Enumerable.Empty<VentaExtraidaDto>();
                 }
 
-                // Marcar el origen
                 foreach (var venta in ventasApi)
                 {
                     venta.SourceName = "API";

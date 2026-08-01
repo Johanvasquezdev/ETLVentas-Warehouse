@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -40,7 +40,6 @@ namespace ETLVentas.DW.persistencia.Extractors
                     MissingFieldFound = null
                 };
 
-                // Leer los 4 archivos CSV
                 var customers = ReadCsv<CustomerCsvDto>(Path.Combine(_csvFolderPath, "customers.csv"), csvConfig);
                 var products = ReadCsv<ProductCsvDto>(Path.Combine(_csvFolderPath, "products.csv"), csvConfig);
                 var orders = ReadCsv<OrderCsvDto>(Path.Combine(_csvFolderPath, "orders.csv"), csvConfig);
@@ -49,7 +48,6 @@ namespace ETLVentas.DW.persistencia.Extractors
                 _logger.LogInformation("[CSV] Leídos: {Cust} clientes, {Prod} productos, {Ord} órdenes, {Det} detalles",
                     customers.Count, products.Count, orders.Count, orderDetails.Count);
 
-                // JOIN en memoria (Desnormalización) para crear registros planos
                 var ventasPlanas = (from det in orderDetails
                                     join ord in orders on det.OrderID equals ord.OrderID
                                     join cust in customers on ord.CustomerID equals cust.CustomerID

@@ -1,4 +1,4 @@
-﻿using ETLVentas.DW.application.Interfaces.Services;
+using ETLVentas.DW.application.Interfaces.Services;
 using ETLVentas.DW.persistencia;
 using ETLVentas.DW.persistencia.Extractors;
 using ETLVentas.DW.persistencia.Services;
@@ -13,7 +13,6 @@ using System.IO;
 
 var builder = Host.CreateDefaultBuilder(args);
 
-// Configuracion de logging ultra-limpio para la presentacion
 builder.ConfigureLogging(logging =>
 {
     logging.ClearProviders();

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -19,7 +19,6 @@ namespace ETLVentas.DW.persistencia.Services
         private readonly IDbCleanupService _cleanupService;
         private readonly ILogger<EtlOrchestratorService> _logger;
 
-        // Cache de datos extraídos para reutilizar entre dimensiones y hechos
         private List<VentaExtraidaDto> _datosExtraidos = new();
 
         public EtlOrchestratorService(
@@ -34,9 +33,6 @@ namespace ETLVentas.DW.persistencia.Services
             _logger = logger;
         }
 
-        /// <summary>
-        /// TAREA 1: Limpia y carga todas las dimensiones del Data Warehouse.
-        /// </summary>
         public async Task<OperationResult> CargarDimensionesAsync()
         {
             _logger.LogInformation("╔══════════════════════════════════════════════════╗");
@@ -45,12 +41,10 @@ namespace ETLVentas.DW.persistencia.Services
 
             try
             {
-                // PASO 1: LIMPIAR
                 _logger.LogInformation("───── PASO 1: LIMPIEZA ─────");
                 var cleanResult = await _cleanupService.CleanDimensionsAsync();
                 if (!cleanResult.Success) return cleanResult;
 
-                // PASO 2: EXTRAER
                 _logger.LogInformation("───── PASO 2: EXTRACCIÓN ─────");
                 _datosExtraidos = await ExtraerDatosAsync();
                 if (!_datosExtraidos.Any())
@@ -59,7 +53,6 @@ namespace ETLVentas.DW.persistencia.Services
                 _logger.LogInformation("[Extracción] Total combinado: {Total} registros de {Fuentes} fuentes.",
                     _datosExtraidos.Count, _extractors.Count());
 
-                // PASO 3: TRANSFORMAR Y CARGAR DIMENSIONES
                 _logger.LogInformation("───── PASO 3: TRANSFORMACIÓN Y CARGA ─────");
 
                 var custResult = await CargarDimCustomerAsync(_datosExtraidos);
@@ -84,9 +77,6 @@ namespace ETLVentas.DW.persistencia.Services
             }
         }
 
-        /// <summary>
-        /// TAREA 2: Limpia y carga la tabla de hechos FactSales.
-        /// </summary>
         public async Task<OperationResult> CargarFactSalesAsync()
         {
             _logger.LogInformation("╔══════════════════════════════════════════════════╗");
@@ -95,19 +85,16 @@ namespace ETLVentas.DW.persistencia.Services
 
             try
             {
-                // PASO 1: LIMPIAR SOLO FACTS
                 _logger.LogInformation("───── PASO 1: LIMPIEZA DE FACTS ─────");
                 var cleanResult = await _cleanupService.CleanFactsAsync();
                 if (!cleanResult.Success) return cleanResult;
 
-                // PASO 2: EXTRAER (si no hay datos en cache, re-extraer)
                 if (!_datosExtraidos.Any())
                 {
                     _logger.LogInformation("───── PASO 2: RE-EXTRACCIÓN ─────");
                     _datosExtraidos = await ExtraerDatosAsync();
                 }
 
-                // PASO 3: OBTENER MAPAS DE CLAVES SURROGADAS
                 _logger.LogInformation("───── PASO 3: MAPEO DE CLAVES SURROGADAS ─────");
 
                 var customerMap = await _context.DimCustomers
@@ -129,7 +116,6 @@ namespace ETLVentas.DW.persistencia.Services
                 _logger.LogInformation("[Mapeo] Claves cargadas - Clientes: {C}, Productos: {P}, Fechas: {D}, Fuentes: {S}",
                     customerMap.Count, productMap.Count, dateMap.Count, sourceMap.Count);
 
-                // PASO 4: TRANSFORMAR Y CARGAR HECHOS
                 _logger.LogInformation("───── PASO 4: CARGA DE HECHOS ─────");
 
                 var factsList = new List<FactSales>();
@@ -137,7 +123,6 @@ namespace ETLVentas.DW.persistencia.Services
 
                 foreach (var venta in _datosExtraidos)
                 {
-                    // Buscar las claves surrogadas
                     if (!customerMap.TryGetValue(venta.CustomerID, out int customerKey) ||
                         !productMap.TryGetValue(venta.ProductID, out int productKey) ||
                         !dateMap.TryGetValue(venta.SaleDate.Date, out int dateKey) ||
@@ -160,7 +145,6 @@ namespace ETLVentas.DW.persistencia.Services
                     });
                 }
 
-                // Insertar en bloques de 5000 para no saturar la memoria
                 int totalInsertados = 0;
                 foreach (var batch in factsList.Chunk(5000))
                 {
@@ -185,9 +169,6 @@ namespace ETLVentas.DW.persistencia.Services
             }
         }
 
-        // ==========================================
-        // MÉTODOS PRIVADOS (DRY - Reutilizables)
-        // ==========================================
 
         private async Task<List<VentaExtraidaDto>> ExtraerDatosAsync()
         {

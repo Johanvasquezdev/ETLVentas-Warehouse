@@ -1,11 +1,7 @@
-﻿using System;
+using System;
 
 namespace ETLVentas.DW.application.Models.Dtos
 {
-    /// <summary>
-    /// DTO unificado de salida para todos los extractores.
-    /// Representa una venta desnormalizada (plana) lista para ser transformada.
-    /// </summary>
     public class VentaExtraidaDto
     {
         public int OrderID { get; set; }
@@ -21,6 +17,6 @@ namespace ETLVentas.DW.application.Models.Dtos
         public decimal UnitPrice { get; set; }
         public int Quantity { get; set; }
         public DateTime SaleDate { get; set; }
-        public string SourceName { get; set; } = string.Empty; // CSV, API, External Database
+        public string SourceName { get; set; } = string.Empty;
     }
 }

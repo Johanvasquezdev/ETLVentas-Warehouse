@@ -1,4 +1,4 @@
-﻿using ETLVentas.DW.domain.Entities;
+using ETLVentas.DW.domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

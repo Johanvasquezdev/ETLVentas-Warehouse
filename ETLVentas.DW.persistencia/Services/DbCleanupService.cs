@@ -24,11 +24,9 @@ namespace ETLVentas.DW.persistencia.Services
 
             try
             {
-                // Primero borrar FactSales por las FK
                 await _context.Database.ExecuteSqlRawAsync("TRUNCATE TABLE FactSales");
                 _logger.LogInformation("[Cleanup] FactSales vaciada (dependencia FK).");
 
-                // Ahora borrar dimensiones
                 await _context.Database.ExecuteSqlRawAsync("DELETE FROM DimCustomer");
                 _logger.LogInformation("[Cleanup] DimCustomer vaciada.");
 
@@ -38,7 +36,6 @@ namespace ETLVentas.DW.persistencia.Services
                 await _context.Database.ExecuteSqlRawAsync("DELETE FROM DimDate");
                 _logger.LogInformation("[Cleanup] DimDate vaciada.");
 
-                // Resetear contadores de identidad
                 await _context.Database.ExecuteSqlRawAsync("DBCC CHECKIDENT ('DimCustomer', RESEED, 0)");
                 await _context.Database.ExecuteSqlRawAsync("DBCC CHECKIDENT ('DimProduct', RESEED, 0)");
                 await _context.Database.ExecuteSqlRawAsync("DBCC CHECKIDENT ('FactSales', RESEED, 0)");
@@ -61,9 +58,6 @@ namespace ETLVentas.DW.persistencia.Services
             try
             {
                 await _context.Database.ExecuteSqlRawAsync("TRUNCATE TABLE FactSales");
-                // TRUNCATE TABLE already reseeds the identity to 0 automatically.
-                // However, I will keep DBCC CHECKIDENT for consistency or remove it. Let's just remove it.
-                // wait, if I just replace it, let's keep it minimal:
                 await _context.Database.ExecuteSqlRawAsync("DBCC CHECKIDENT ('FactSales', RESEED, 0)");
 
                 _logger.LogInformation("[Cleanup] FactSales vaciada y reseteada.");

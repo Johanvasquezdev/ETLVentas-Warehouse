@@ -1,4 +1,4 @@
-﻿using ETLVentas.DW.application.Interfaces.Services;
+using ETLVentas.DW.application.Interfaces.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -25,14 +25,14 @@ namespace ETLVentas.DW.workerLoad
             _logger.LogInformation("║       Inicio: {Fecha}                    ║", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
             _logger.LogInformation("╚══════════════════════════════════════════════════════════╝");
 
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
             try
             {
-                // Crear un Scope para resolver los servicios Scoped (como DbContext y EtlOrchestratorService)
                 using (var scope = _serviceProvider.CreateScope())
                 {
                     var etlOrchestrator = scope.ServiceProvider.GetRequiredService<IEtlOrchestratorService>();
 
-                    // ─── TAREA 1: CARGAR DIMENSIONES ───
                     _logger.LogInformation("");
                     var dimResult = await etlOrchestrator.CargarDimensionesAsync();
 
@@ -45,7 +45,6 @@ namespace ETLVentas.DW.workerLoad
 
                     _logger.LogInformation("[TAREA 1] Resultado: {Msg}", dimResult.Message);
 
-                    // ─── TAREA 2: CARGAR HECHOS ───
                     _logger.LogInformation("");
                     var factResult = await etlOrchestrator.CargarFactSalesAsync();
 
@@ -59,10 +58,12 @@ namespace ETLVentas.DW.workerLoad
                     _logger.LogInformation("[TAREA 2] Resultado: {Msg}", factResult.Message);
                 }
 
-                // ─── RESUMEN FINAL ───
+                stopwatch.Stop();
+
                 _logger.LogInformation("");
                 _logger.LogInformation("╔══════════════════════════════════════════════════════════╗");
                 _logger.LogInformation("║       PROCESO ETL FINALIZADO EXITOSAMENTE               ║");
+                _logger.LogInformation("║       Tiempo Total: {Ms} ms ({Sec} segundos)               ║", stopwatch.ElapsedMilliseconds, (stopwatch.ElapsedMilliseconds / 1000.0).ToString("F2"));
                 _logger.LogInformation("║       Fin: {Fecha}                       ║", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                 _logger.LogInformation("╚══════════════════════════════════════════════════════════╝");
             }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace ETLVentas.DW.domain.Entities
 {
@@ -16,7 +16,6 @@ namespace ETLVentas.DW.domain.Entities
         public decimal UnitPrice { get; set; }
         public decimal TotalSale { get; set; }
 
-        // Navigation Properties para Entity Framework (Relaciones)
         public virtual DimDate? Date { get; set; }
         public virtual DimCustomer? Customer { get; set; }
         public virtual DimProduct? Product { get; set; }

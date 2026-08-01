@@ -1,4 +1,4 @@
-﻿namespace ETLVentas.DW.application.Models.Dtos.Csv
+namespace ETLVentas.DW.application.Models.Dtos.Csv
 {
     public class ProductCsvDto
     {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,7 +17,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// ENDPOINT DE VENTAS (MOCK PARA ETL)
 app.MapGet("/api/ventas", () =>
 {
     var ventasMock = new List<VentaExtraidaDto>
